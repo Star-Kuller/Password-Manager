@@ -1,0 +1,6 @@
+﻿services:
+  passwordmanager.api:
+    image: passwordmanager.api
+    build:
+      context: .
+      dockerfile: PasswordManager.API/Dockerfile
