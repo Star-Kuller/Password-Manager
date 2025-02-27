@@ -1,7 +1,7 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
-using PasswordManager.Application.Handlers;
 using PasswordManager.Application.Handlers.Authentication;
+using PasswordManager.Infrastructure.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,3 +20,6 @@ app.UseSwaggerGen();
 app.UseHttpsRedirection();
 
 app.Run();
+
+var logger = app.Services.GetRequiredService<ILogger>();
+MigrationRunner.RunMigrations("", logger);
