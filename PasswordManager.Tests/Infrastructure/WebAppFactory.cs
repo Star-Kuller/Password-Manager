@@ -12,6 +12,7 @@ public class WebAppFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureTestServices(services =>
         {
+            //TODO тут нужно сделать подмену файла конфигурации
         });
     }
 }

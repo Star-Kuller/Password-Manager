@@ -1,6 +1,5 @@
 using FastEndpoints;
 using MediatR;
-using PasswordManager.Application.Handlers;
 using PasswordManager.Application.Handlers.Authentication;
 
 namespace PasswordManager.API.Endpoints.Authentication;

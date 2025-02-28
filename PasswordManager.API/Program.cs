@@ -1,5 +1,6 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
+using PasswordManager.API.Middlewares;
 using PasswordManager.Application.Handlers.Authentication;
 using PasswordManager.Infrastructure.Database;
 
@@ -17,6 +18,7 @@ var app = builder.Build();
 app.UseFastEndpoints();
 app.UseSwaggerGen();
 
+app.UseMiddleware<ExceptionsHandler>();
 app.UseHttpsRedirection();
 
 app.Run();
