@@ -1,6 +1,7 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using PasswordManager.API.Middlewares;
+using PasswordManager.API.Middlewares.Exceptions;
 using PasswordManager.Application.Handlers.Authentication;
 using PasswordManager.Infrastructure.Database;
 
