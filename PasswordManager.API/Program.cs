@@ -10,9 +10,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddFastEndpoints();
 builder.Services.SwaggerDocument();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Register).Assembly));
-
+var connectionString = builder.Configuration.GetConnectionString("MainDbConnection");
 
 var app = builder.Build();
+
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+MigrationRunner.RunMigrations(connectionString, logger);
 
 // Configure the HTTP request pipeline.
 app.UseFastEndpoints();
@@ -22,6 +25,3 @@ app.UseMiddleware<ExceptionsHandler>();
 app.UseHttpsRedirection();
 
 app.Run();
-
-var logger = app.Services.GetRequiredService<ILogger>();
-MigrationRunner.RunMigrations("", logger);

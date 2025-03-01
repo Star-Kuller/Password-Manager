@@ -1,12 +1,13 @@
 using FluentMigrator.Runner;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace PasswordManager.Infrastructure.Database;
 
 public static class MigrationRunner
 {
-    public static void RunMigrations(string connectionString, ILogger logger)
+    public static void RunMigrations(string? connectionString, ILogger logger)
     {
         if(string.IsNullOrWhiteSpace(connectionString))
         {
@@ -15,6 +16,24 @@ public static class MigrationRunner
         };
         try
         {
+            // Проверяем существование базы данных
+            var builder = new NpgsqlConnectionStringBuilder(connectionString);
+            var databaseName = builder.Database;
+
+            using (var connection = new NpgsqlConnection(builder.ConnectionString.Replace($"Database={databaseName}", "Database=postgres")))
+            {
+                connection.Open();
+                var command = new NpgsqlCommand($"SELECT 1 FROM pg_database WHERE datname='{databaseName}'", connection);
+                var exists = command.ExecuteScalar() != null;
+
+                if (!exists)
+                {
+                    logger.LogInformation("База данных {DatabaseName} не существует. Создаём её...", databaseName);
+                    command.CommandText = $"CREATE DATABASE \"{databaseName}\"";
+                    command.ExecuteNonQuery();
+                }
+            }
+            
             var serviceProvider = new ServiceCollection()
                 .AddFluentMigratorCore()
                 .ConfigureRunner(rb => rb
