@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddFastEndpoints();
 builder.Services.SwaggerDocument();
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Register).Assembly));
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Registration).Assembly));
 var connectionString = builder.Configuration.GetConnectionString("MainDbConnection");
 
 builder.Services.AddTransient<IResponseWriter, ResponseWriter>();

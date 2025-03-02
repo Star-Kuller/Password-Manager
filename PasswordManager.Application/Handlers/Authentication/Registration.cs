@@ -2,9 +2,9 @@ using MediatR;
 
 namespace PasswordManager.Application.Handlers.Authentication;
 
-public class Register
+public class Registration
 {
-    public record Request(string Secret, string Login, string Password): IRequest<Response>;
+    public record Request(string Secret, string Email, string Password): IRequest<Response>;
     public record Response();
     
     public class Handler : IRequestHandler<Request, Response>
