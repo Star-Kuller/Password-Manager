@@ -13,6 +13,8 @@ builder.Services.SwaggerDocument();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Register).Assembly));
 var connectionString = builder.Configuration.GetConnectionString("MainDbConnection");
 
+builder.Services.AddTransient<IResponseWriter, ResponseWriter>();
+
 var app = builder.Build();
 
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
@@ -22,7 +24,7 @@ MigrationRunner.RunMigrations(connectionString, logger);
 app.UseFastEndpoints();
 app.UseSwaggerGen();
 
-app.UseMiddleware<ExceptionsHandler>();
+app.UseMiddleware<ExceptionsHandlerMiddleware>();
 app.UseHttpsRedirection();
 
 app.Run();

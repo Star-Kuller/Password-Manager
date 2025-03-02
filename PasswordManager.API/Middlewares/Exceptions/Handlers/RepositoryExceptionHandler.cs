@@ -1,13 +1,13 @@
 using System.Net;
+using PasswordManager.Application.Exceptions;
 
 namespace PasswordManager.API.Middlewares.Exceptions.Handlers;
 
-public class RepositoryExceptionHandler : ExceptionHandlerBase
+public class RepositoryExceptionHandler(IExceptionHandler? next) : ExceptionHandlerBase<RepositoryException>(next)
 {
-    public override async Task HandleAsync(HttpContext context, Exception exception, ILogger logger)
+    protected override async Task HandleAsync(IResponseWriter responseWriter, RepositoryException exception, ILogger logger)
     {
-        context.Response.ContentType = "application/json";
-        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
         logger.LogError(exception, "Ошибка базы данных");
+        await responseWriter.WriteAsync(HttpStatusCode.InternalServerError);
     }
 }
