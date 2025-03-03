@@ -9,8 +9,8 @@ public class Init : AutoReversingMigration
     {
         Create.Table("Users")
             .WithColumn("Id").AsInt64().PrimaryKey().Identity()
-            .WithColumn("Email").AsString(255).NotNullable().Unique()
-            .WithColumn("PasswordHash").AsString(255).NotNullable() 
-            .WithColumn("SecretKey").AsString(255).NotNullable();
+            .WithColumn("Email").AsBinary().NotNullable().Unique()
+            .WithColumn("PasswordHash").AsBinary().NotNullable() 
+            .WithColumn("SecretKey").AsBinary().NotNullable();
     }
 }
