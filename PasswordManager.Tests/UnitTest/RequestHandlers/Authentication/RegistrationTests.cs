@@ -22,6 +22,8 @@ public class RegistrationTests
             .Returns(SessionId);
         _mockCryptographer.Setup(ct => ct.Encrypt(It.IsAny<string>()))
             .Returns(_encryptedData);
+        _mockUserRepository.Setup(ur => ur.GetAsync(It.IsAny<string>()))!
+            .ReturnsAsync((User?)null);
         _mockUserRepository.Setup(ur => ur.AddAsync(It.IsAny<User>()))
             .ReturnsAsync(UserId);
     }
@@ -30,6 +32,8 @@ public class RegistrationTests
     public async Task Registration_successful()
     {
         //Arrange
+        SetUp();
+        
         var request = new Registration.Request(
             "encrypted_secret_key",
             "test@email.com",
@@ -53,6 +57,6 @@ public class RegistrationTests
             )), Times.Once);
         
         response.Should().NotBeNull();
-        response.SessionId.Should().Be(SessionId);
+        response.Should().Be(SessionId);
     }
 }

@@ -4,7 +4,7 @@ using PasswordManager.Application.Handlers.Authentication;
 
 namespace PasswordManager.API.Endpoints.Authentication;
 
-public class RegisterEndpoint(IMediator mediator) : Endpoint<Registration.Request, Registration.Response>
+public class RegisterEndpoint(IMediator mediator) : Endpoint<Registration.Request>
 {
     public override void Configure()
     {
@@ -15,7 +15,7 @@ public class RegisterEndpoint(IMediator mediator) : Endpoint<Registration.Reques
     public override async Task HandleAsync(Registration.Request req, CancellationToken ct)
     {
         var response = await mediator.Send(req, ct);
-        await SendAsync(response, StatusCodes.Status201Created, ct);
+        await SendNoContentAsync(ct);
     }
 }
 
