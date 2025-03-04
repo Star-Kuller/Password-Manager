@@ -7,14 +7,14 @@ namespace PasswordManager.Application.Handlers.Authentication;
 
 public class Registration
 {
-    public record Request(string Secret, string Email, string Password): IRequest<string>;
+    public record Request(string Secret, string Email, string Password): IRequest;
     
     public class Handler(
         IUserRepository userRepository,
         ICryptographer cryptographer,
-        ISessionManager sessionManager) : IRequestHandler<Request, string>
+        ISessionManager sessionManager) : IRequestHandler<Request>
     {
-        public async Task<string> Handle(Request request, CancellationToken cancellationToken)
+        public async Task Handle(Request request, CancellationToken cancellationToken)
         {
             var user = await userRepository.GetAsync(request.Email);
             if (user is not null)
@@ -27,8 +27,7 @@ public class Registration
                 SecretKey = cryptographer.Encrypt(request.Secret)
             };
             var id = await userRepository.AddAsync(user);
-
-            return sessionManager.CreateSession(id);
+            await sessionManager.CreateSession(id);
         }
     }
 }
