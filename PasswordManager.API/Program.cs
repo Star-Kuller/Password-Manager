@@ -4,13 +4,16 @@ using FastEndpoints.Swagger;
 using PasswordManager.API.Middlewares;
 using PasswordManager.API.Middlewares.Exceptions;
 using PasswordManager.Application.Handlers.Authentication;
+using PasswordManager.Application.Interfaces;
 using PasswordManager.Infrastructure.Database;
+using PasswordManager.Infrastructure.Database.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services
-    .AddAuthenticationCookie(validFor: TimeSpan.FromMinutes(30))
+    .AddAuthenticationCookie(validFor: TimeSpan.FromMinutes(30),
+        opt => opt.SlidingExpiration = true)
     .AddAuthorization()
     .AddFastEndpoints();
 
@@ -19,6 +22,7 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Regis
 var connectionString = builder.Configuration.GetConnectionString("MainDbConnection");
 
 builder.Services.AddTransient<IResponseWriter, ResponseWriter>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var app = builder.Build();
 

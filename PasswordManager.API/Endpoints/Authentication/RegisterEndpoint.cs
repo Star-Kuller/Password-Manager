@@ -1,8 +1,5 @@
 using FastEndpoints;
-using FastEndpoints.Security;
 using MediatR;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using PasswordManager.Application.Handlers.Authentication;
 
 namespace PasswordManager.API.Endpoints.Authentication;

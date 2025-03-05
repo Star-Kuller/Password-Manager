@@ -1,5 +1,3 @@
-using System.Security.Claims;
-using FluentAssertions;
 using Moq;
 using PasswordManager.Application.Handlers.Authentication;
 using PasswordManager.Application.Interfaces;
@@ -11,15 +9,11 @@ public class RegistrationTests
 {
     private readonly Mock<ISessionManager> _mockSessionManager = new();
     private readonly Mock<IUserRepository> _mockUserRepository = new();
-    private readonly Mock<ICryptographer> _mockCryptographer = new();
     private const long UserId = 1;
-    private readonly byte[] _encryptedData = [01, 02, 03, 04, 05];
 
     private void SetUp()
     {
         _mockSessionManager.Setup(sm => sm.CreateSession(It.IsAny<long>()));
-        _mockCryptographer.Setup(ct => ct.Encrypt(It.IsAny<string>()))
-            .Returns(_encryptedData);
         _mockUserRepository.Setup(ur => ur.GetAsync(It.IsAny<string>()))!
             .ReturnsAsync((User?)null);
         _mockUserRepository.Setup(ur => ur.AddAsync(It.IsAny<User>()))
@@ -39,7 +33,6 @@ public class RegistrationTests
         
         var handler = new Registration.Handler(
             _mockUserRepository.Object,
-            _mockCryptographer.Object,
             _mockSessionManager.Object);
         
         //Act
@@ -50,8 +43,8 @@ public class RegistrationTests
             ur.AddAsync(It.Is<User>(
                 u =>
                     u.EmailConfirmed == false &&
-                    u.Email == _encryptedData &&
-                    u.SecretKey == _encryptedData
+                    u.Email == request.Email &&
+                    u.SecretKey == request.Secret
             )), Times.Once);
         
         _mockSessionManager.Verify(sm => sm.CreateSession(UserId));
@@ -70,7 +63,6 @@ public class RegistrationTests
         
         var handler = new Registration.Handler(
             _mockUserRepository.Object,
-            _mockCryptographer.Object,
             _mockSessionManager.Object);
         
         //Act
@@ -81,8 +73,8 @@ public class RegistrationTests
             ur.AddAsync(It.Is<User>(
                 u =>
                     u.EmailConfirmed == false &&
-                    u.Email == _encryptedData &&
-                    u.SecretKey == _encryptedData
+                    u.Email == request.Email &&
+                    u.SecretKey == request.Secret
             )), Times.Once);
         
         _mockSessionManager.Verify(sm => sm.CreateSession(UserId));

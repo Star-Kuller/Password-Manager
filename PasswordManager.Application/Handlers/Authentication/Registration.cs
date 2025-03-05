@@ -11,7 +11,6 @@ public class Registration
     
     public class Handler(
         IUserRepository userRepository,
-        ICryptographer cryptographer,
         ISessionManager sessionManager) : IRequestHandler<Request>
     {
         public async Task Handle(Request request, CancellationToken cancellationToken)
@@ -22,9 +21,9 @@ public class Registration
             
             user = new User
             {
-                Email = cryptographer.Encrypt(request.Email),
+                Email = request.Email,
                 PasswordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(request.Password),
-                SecretKey = cryptographer.Encrypt(request.Secret)
+                SecretKey = request.Secret
             };
             var id = await userRepository.AddAsync(user);
             await sessionManager.CreateSession(id);
