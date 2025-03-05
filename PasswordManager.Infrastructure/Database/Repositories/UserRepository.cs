@@ -70,7 +70,11 @@ public class UserRepository(ICryptographer cryptographer, IConfiguration configu
                            """;
 
         await using var connection = new NpgsqlConnection(_connectionString);
-        var result = await connection.QuerySingleOrDefaultAsync<EncryptedUser>(sql, new { Email = email });
+        var result = await connection.QuerySingleOrDefaultAsync<EncryptedUser>(sql,
+            new
+            {
+                Email = cryptographer.Encrypt(email)
+            });
         
         return result?.ToUser(cryptographer);
     }
