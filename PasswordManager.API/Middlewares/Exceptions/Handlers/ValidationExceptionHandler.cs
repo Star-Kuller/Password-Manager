@@ -1,6 +1,5 @@
 using System.Net;
 using FluentValidation;
-using PasswordManager.API.Middlewares.Exceptions.Models;
 
 namespace PasswordManager.API.Middlewares.Exceptions.Handlers;
 
@@ -15,7 +14,9 @@ public class ValidationExceptionHandler(IExceptionHandler? next) : ExceptionHand
             propertyErrors[error.PropertyName].Add(error.ErrorMessage);
         }
         var response = propertyErrors
-            .Select(e => new ValidationExceptionResponse(e.Key, e.Value));
+            .Select(e => new Response(e.Key, e.Value));
         await responseWriter.WriteAsync(HttpStatusCode.BadRequest, response);
     }
+    
+    public record Response(string Property, List<string> Messages);
 }

@@ -6,8 +6,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using PasswordManager.API.Middlewares;
 using PasswordManager.API.Middlewares.Exceptions;
-using PasswordManager.API.Middlewares.Exceptions.Models;
-using PasswordManager.Application.Exceptions;
+using PasswordManager.API.Middlewares.Exceptions.Handlers;
 
 namespace PasswordManager.Tests.UnitTest.Middlewares;
 
@@ -54,7 +53,7 @@ public class ExceptionsHandlerMiddlewareTests
         await middleware.Invoke(_mockHttpContext.Object, _mockLogger.Object, _mockResponseWriter.Object);
 
         //Assert
-        var expectedResponse = new List<ValidationExceptionResponse>
+        var expectedResponse = new List<ValidationExceptionHandler.Response>
         {
             new("TestPropertyName1", ["TestErrorMessage1", "TestErrorMessage2"]),
             new("TestPropertyName2", ["TestErrorMessage3"])
@@ -67,46 +66,9 @@ public class ExceptionsHandlerMiddlewareTests
         _mockResponseWriter.Verify(
             writer => writer.WriteAsync(
                 HttpStatusCode.BadRequest,
-                It.Is<IEnumerable<ValidationExceptionResponse>>(response
+                It.Is<IEnumerable<ValidationExceptionHandler.Response>>(response
                     => response.SequenceEqual(expectedResponse, new ValidationExceptionResponseComparer()))
                 ),
-            Times.Once);
-    }
-    
-    [Fact]
-    public async Task ExceptionHandler_catch_RepositoryException()
-    {
-        //Arrange
-        var repositoryException = new RepositoryException("TestMessage");
-        _mockRequestDelegate
-            .Setup(rd => rd.Invoke(It.IsAny<HttpContext>()))
-            .ThrowsAsync(repositoryException);
-        
-        var middleware = new ExceptionsHandlerMiddleware(_mockRequestDelegate.Object);
-        
-        //Act
-        await middleware.Invoke(_mockHttpContext.Object, _mockLogger.Object, _mockResponseWriter.Object);
-
-        //Assert
-        _mockLogger.Verify(
-            logger => 
-                logger.Log(
-                    LogLevel.Error,
-                    It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => true),
-                    repositoryException,
-                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.Once);
-        
-        _mockResponseWriter.VerifySet(
-            writer => 
-                writer.HttpContext = _mockHttpContext.Object,
-            Times.Once);
-        
-        _mockResponseWriter.Verify(
-            writer => writer.WriteAsync(
-                HttpStatusCode.InternalServerError
-            ),
             Times.Once);
     }
     
@@ -147,15 +109,15 @@ public class ExceptionsHandlerMiddlewareTests
             Times.Once);
     }
 
-    private class ValidationExceptionResponseComparer : IEqualityComparer<ValidationExceptionResponse>
+    private class ValidationExceptionResponseComparer : IEqualityComparer<ValidationExceptionHandler.Response>
     {
-        public bool Equals(ValidationExceptionResponse? x, ValidationExceptionResponse? y)
+        public bool Equals(ValidationExceptionHandler.Response? x, ValidationExceptionHandler.Response? y)
         {
             return x!.Property == y!.Property &&
                    x.Messages.SequenceEqual(y.Messages);
         }
 
-        public int GetHashCode(ValidationExceptionResponse obj)
+        public int GetHashCode(ValidationExceptionHandler.Response obj)
         {
             return HashCode.Combine(obj.Property, obj.Messages);
         }

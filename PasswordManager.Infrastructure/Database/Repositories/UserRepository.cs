@@ -1,32 +1,33 @@
+using System.Data;
 using Dapper;
-using Microsoft.Extensions.Configuration;
-using Npgsql;
+using PasswordManager.Application.Exceptions;
 using PasswordManager.Application.Interfaces;
+using PasswordManager.Application.Interfaces.Database.Repositories;
 using PasswordManager.Domain.Entities;
 
 namespace PasswordManager.Infrastructure.Database.Repositories;
 
-public class UserRepository(ICryptographer cryptographer, IConfiguration configuration) : IUserRepository
+public class UserRepository(IDbConnection dbConnection,
+    ICryptographer cryptographer, IDbTransaction transaction) : IUserRepository
 {
-    private readonly string? _connectionString = configuration.GetConnectionString("MainDbConnection");
     public async Task<long> AddAsync(User user)
     {
         const string sql = """
             INSERT INTO Users (Email, PasswordHash, SecretKey, EmailConfirmed)
             VALUES (@Email, @PasswordHash, @SecretKey, @EmailConfirmed)
+            ON CONFLICT (Email) DO NOTHING
             RETURNING Id
             """;
 
-        await using var connection = new NpgsqlConnection(_connectionString);
-        await connection.OpenAsync();
-
-        return await connection.QuerySingleAsync<long>(sql, new
+        var result = await dbConnection.QuerySingleAsync<long?>(sql,
+            new EncryptedUser(user, cryptographer), transaction);
+        
+        if (result == null)
         {
-            Email = cryptographer.Encrypt(user.Email),
-            PasswordHash = cryptographer.Encrypt(user.PasswordHash),
-            SecretKey = cryptographer.Encrypt(user.SecretKey),
-            EmailConfirmed = user.EmailConfirmed
-        });
+            throw new AlreadyExistException($"Пользователь с почтой {user.Email} уже зарегистрирован");
+        }
+
+        return result.Value;
     }
 
     public async Task UpdateAsync(User user)
@@ -36,15 +37,9 @@ public class UserRepository(ICryptographer cryptographer, IConfiguration configu
             SET PasswordHash = @PasswordHash, SecretKey = @SecretKey, EmailConfirmed = @EmailConfirmed
             WHERE Id = @Id
             """;
-
-        await using var connection = new NpgsqlConnection(_connectionString);
-        await connection.ExecuteAsync(sql, new
-        {
-            Id = user.Id,
-            PasswordHash = cryptographer.Encrypt(user.PasswordHash),
-            SecretKey = cryptographer.Encrypt(user.SecretKey),
-            EmailConfirmed = user.EmailConfirmed
-        });
+        
+        await dbConnection.ExecuteAsync(sql, 
+            new EncryptedUser(user, cryptographer), transaction);
     }
 
     public async Task<User?> GetAsync(long id)
@@ -54,11 +49,14 @@ public class UserRepository(ICryptographer cryptographer, IConfiguration configu
             FROM Users
             WHERE Id = @Id
             """;
-
-        await using var connection = new NpgsqlConnection(_connectionString);
-        var result = await connection.QuerySingleOrDefaultAsync<EncryptedUser>(sql, new { Id = id });
         
-        return result?.ToUser(cryptographer);
+        var result = await dbConnection.QuerySingleOrDefaultAsync<EncryptedUser>(sql,
+            new { Id = id }, transaction);
+
+        if (result is null)
+            throw new NotFoundException("Пользователь", "ID", id);
+        
+        return result.ToUser(cryptographer);
     }
 
     public async Task<User?> GetAsync(string email)
@@ -68,24 +66,29 @@ public class UserRepository(ICryptographer cryptographer, IConfiguration configu
                            FROM Users
                            WHERE Email = @Email
                            """;
-
-        await using var connection = new NpgsqlConnection(_connectionString);
-        var result = await connection.QuerySingleOrDefaultAsync<EncryptedUser>(sql,
-            new
-            {
-                Email = cryptographer.Encrypt(email)
-            });
+        
+        var result = await dbConnection.QuerySingleOrDefaultAsync<EncryptedUser>(sql,
+            new { Email = cryptographer.Encrypt(email) }, transaction);
         
         return result?.ToUser(cryptographer);
     }
     
-    private class EncryptedUser
+    private class EncryptedUser()
     {
-        public long Id { get; init; }
+        public long? Id { get; init; }
         public byte[] Email { get; init; }
         public bool EmailConfirmed { get; init; }
         public byte[] PasswordHash { get; init; }
         public byte[] SecretKey { get; init; }
+
+        public EncryptedUser(User user, ICryptographer cryptographer) : this()
+        {
+            Id = user.Id;
+            Email = cryptographer.Encrypt(user.Email);
+            EmailConfirmed = user.EmailConfirmed;
+            PasswordHash = cryptographer.Encrypt(user.PasswordHash);
+            SecretKey = cryptographer.Encrypt(user.SecretKey);
+        }
 
         public User ToUser(ICryptographer cryptographer)
         {

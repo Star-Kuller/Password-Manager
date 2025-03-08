@@ -10,9 +10,10 @@ public class ExceptionsHandlerMiddleware
     {
         _next = next;
         
-        var repositoryHandler = new RepositoryExceptionHandler(null);
-        var validationHandler = new ValidationExceptionHandler(repositoryHandler);
-        _chainOfHandlers = validationHandler;
+        var validationHandler = new ValidationExceptionHandler(null);
+        var alreadyExistHandler = new AlreadyExistExceptionHandler(validationHandler);
+        var notFoundHandler = new NotFoundExceptionHandler(alreadyExistHandler);
+        _chainOfHandlers = notFoundHandler;
     }
     
     public async Task Invoke(HttpContext context, ILogger<ExceptionsHandlerMiddleware> logger, IResponseWriter responseWriter)
