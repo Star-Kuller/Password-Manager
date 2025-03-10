@@ -24,7 +24,7 @@ public class RegistrationTests
     }
         
     [Fact]
-    public async Task Registration_successful()
+    public async Task Registration_is_successful()
     {
         //Arrange
         SetUp();
@@ -53,7 +53,7 @@ public class RegistrationTests
     }
     
     [Fact]
-    public async Task Registration_when_user_already_exist()
+    public async Task Registration_failed_when_user_already_exist()
     {
         //Arrange
         SetUp();

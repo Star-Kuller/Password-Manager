@@ -4,12 +4,9 @@ using FastEndpoints.Swagger;
 using PasswordManager.API.Middlewares;
 using PasswordManager.API.Middlewares.Exceptions;
 using PasswordManager.Application.Handlers.Authentication;
-using PasswordManager.Application.Interfaces;
 using PasswordManager.Application.Interfaces.Database;
-using PasswordManager.Application.Interfaces.Database.Repositories;
 using PasswordManager.Infrastructure.Database;
 using PasswordManager.Infrastructure.Database.Infrastructure;
-using PasswordManager.Infrastructure.Database.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +22,7 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Regis
 var connectionString = builder.Configuration.GetConnectionString("MainDbConnection");
 
 builder.Services.AddTransient<IResponseWriter, ResponseWriter>();
-builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+builder.Services.AddTransient<IUnitOfWorkFactory, UnitOfWorkFactory>();
 
 var app = builder.Build();
 
