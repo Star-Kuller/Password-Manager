@@ -2,23 +2,25 @@ using FluentAssertions;
 using Moq;
 using PasswordManager.Application.Handlers.Authentication;
 using PasswordManager.Application.Interfaces;
-using PasswordManager.Domain.Entities;
-using PasswordManager.Tests.Infrastructure.Spies;
+using PasswordManager.Application.Models.Encrypted;
+using PasswordManager.Tests.Infrastructure.Spies.Factories;
 
 namespace PasswordManager.Tests.UnitTest.RequestHandlers.Authentication;
 
 public class RegistrationTests
 {
-    private readonly Mock<ISessionManager> _mockSessionManager = new();
-    private readonly DbUnitOfWorkSpy _dbUnitOfWorkSpy = new();
+    private readonly Mock<ISessionManager> _sessionManagerMock = new();
+    private readonly UnitOfWorkSpyFactory _uowSpyFactory = new();
+    private readonly Mock<ICryptographer> _cryptographerMock = new();
     private const long UserId = 1;
 
     private void SetUp()
     {
-        _mockSessionManager.Setup(sm => sm.CreateSession(It.IsAny<long>()));
-        var mockUserRepository = _dbUnitOfWorkSpy.UserRepositoryMock;
-        mockUserRepository.Setup(ur => ur.AddAsync(It.IsAny<User>()))
+        _sessionManagerMock.Setup(sm => sm.CreateSession(It.IsAny<long>()));
+        _uowSpyFactory.Instant.UserRepositoryMock.Setup(ur => ur.AddAsync(It.IsAny<EncryptedUser>()))
             .ReturnsAsync(UserId);
+        _cryptographerMock.Setup(c => c.Encrypt(It.IsAny<string>()))
+            .Returns([01, 02, 03, 04, 05]);
     }
         
     [Fact]
@@ -33,23 +35,21 @@ public class RegistrationTests
             "password_hash");
         
         var handler = new Registration.Handler(
-            _dbUnitOfWorkSpy,
-            _mockSessionManager.Object);
+            _uowSpyFactory,
+            _sessionManagerMock.Object,
+            _cryptographerMock.Object
+            );
         
         //Act
         await handler.Handle(request, CancellationToken.None);
         
         //Assert
-        _dbUnitOfWorkSpy.UserRepositoryMock.Verify(ur =>
-            ur.AddAsync(It.Is<User>(
-                u =>
-                    u.EmailConfirmed == false &&
-                    u.Email == request.Email &&
-                    u.SecretKey == request.Secret
-            )), Times.Once);
-        _dbUnitOfWorkSpy.CommitCounter.Should().Be(1);
+        var uow = _uowSpyFactory.Instant;
+        uow.UserRepositoryMock.Verify(ur =>
+            ur.AddAsync(It.IsAny<EncryptedUser>()), Times.Once);
+        uow.CommitCounter.Should().Be(1);
         
-        _mockSessionManager.Verify(sm => sm.CreateSession(UserId));
+        _sessionManagerMock.Verify(sm => sm.CreateSession(UserId));
     }
     
     [Fact]
@@ -64,22 +64,19 @@ public class RegistrationTests
             "password_hash");
         
         var handler = new Registration.Handler(
-            _dbUnitOfWorkSpy,
-            _mockSessionManager.Object);
+            _uowSpyFactory,
+            _sessionManagerMock.Object,
+            _cryptographerMock.Object);
         
         //Act
         await handler.Handle(request, CancellationToken.None);
         
         //Assert
-        _dbUnitOfWorkSpy.UserRepositoryMock.Verify(ur =>
-            ur.AddAsync(It.Is<User>(
-                u =>
-                    u.EmailConfirmed == false &&
-                    u.Email == request.Email &&
-                    u.SecretKey == request.Secret
-            )), Times.Once);
-        _dbUnitOfWorkSpy.CommitCounter.Should().Be(1);
+        var uow = _uowSpyFactory.Instant;
+        uow.UserRepositoryMock.Verify(ur =>
+            ur.AddAsync(It.IsAny<EncryptedUser>()), Times.Once);
+        uow.CommitCounter.Should().Be(1);
         
-        _mockSessionManager.Verify(sm => sm.CreateSession(UserId));
+        _sessionManagerMock.Verify(sm => sm.CreateSession(UserId));
     }
 }

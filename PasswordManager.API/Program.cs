@@ -8,6 +8,7 @@ using PasswordManager.Application.Interfaces;
 using PasswordManager.Application.Interfaces.Database;
 using PasswordManager.Application.Interfaces.Database.Repositories;
 using PasswordManager.Infrastructure.Database;
+using PasswordManager.Infrastructure.Database.Infrastructure;
 using PasswordManager.Infrastructure.Database.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,7 +25,7 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Regis
 var connectionString = builder.Configuration.GetConnectionString("MainDbConnection");
 
 builder.Services.AddTransient<IResponseWriter, ResponseWriter>();
-builder.Services.AddTransient<IDbUnitOfWork, DbUnitOfWork>();
+builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 
 var app = builder.Build();
 
