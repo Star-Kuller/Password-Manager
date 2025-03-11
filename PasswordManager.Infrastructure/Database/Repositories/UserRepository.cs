@@ -18,7 +18,7 @@ public class UserRepository(IDbConnection connection, IDbTransaction transaction
             ON CONFLICT (login) DO NOTHING
             RETURNING Id
             """;
-        var result = await connection.QuerySingleAsync<long?>(
+        var result = await connection.QuerySingleOrDefaultAsync<long?>(
             sql, user, transaction);
         
         if (result == null)
@@ -29,6 +29,8 @@ public class UserRepository(IDbConnection connection, IDbTransaction transaction
 
     public async Task UpdateAsync(EncryptedUser user)
     {
+        ArgumentNullException.ThrowIfNull(user);
+        
         const string sql = """
             UPDATE Users
             SET PasswordHash = @PasswordHash, SecretKey = @SecretKey
@@ -55,6 +57,8 @@ public class UserRepository(IDbConnection connection, IDbTransaction transaction
 
     public async Task<EncryptedUser?> GetAsync(byte[] login)
     {
+        ArgumentNullException.ThrowIfNull(login);
+        
         const string sql = """
                            SELECT Id, Login, PasswordHash, SecretKey
                            FROM Users

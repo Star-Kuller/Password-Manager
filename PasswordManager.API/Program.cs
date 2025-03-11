@@ -7,6 +7,7 @@ using PasswordManager.API.Middlewares.Exceptions;
 using PasswordManager.Application.Handlers.Authentication;
 using PasswordManager.Application.Interfaces;
 using PasswordManager.Application.Interfaces.Database;
+using PasswordManager.Infrastructure;
 using PasswordManager.Infrastructure.Database;
 using PasswordManager.Infrastructure.Database.Infrastructure;
 

@@ -10,6 +10,7 @@ public class AuthenticationTests(WebAppFactory factory) : IntegrationTestBase(fa
     [Fact]
     public async Task Register_and_login_is_successful()
     {
+        await AppFactory.ResetDatabase();
         // Arrange:/register
         var client = AppFactory.CreateClient();
         var registerReq = JsonContent.Create(

@@ -14,7 +14,8 @@ public class EncryptedUser()
     {
         Id = user.Id;
         Login = cryptographer.Encrypt(user.Login);
-        
+        PasswordHash = cryptographer.Encrypt(user.PasswordHash);
+        SecretKey = cryptographer.Encrypt(user.SecretKey);
     }
 
     public User ToUser(ICryptographer cryptographer)

@@ -3,6 +3,8 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using PasswordManager.Application.Interfaces;
 
+namespace PasswordManager.Infrastructure;
+
 public class AesCryptographer : ICryptographer
 {
     private readonly byte[] _key;

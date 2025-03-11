@@ -25,7 +25,7 @@ public class Registration
                 SecretKey = request.Secret
             };
             var id = await uow.Users.AddAsync(new EncryptedUser(user, cryptographer));
-            uow.CommitAsync(cancellationToken);
+            await uow.CommitAsync(cancellationToken);
             await sessionManager.CreateSession(id);
         }
     }
