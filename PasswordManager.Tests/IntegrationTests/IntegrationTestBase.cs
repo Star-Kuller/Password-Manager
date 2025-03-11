@@ -1,4 +1,3 @@
-using PasswordManager.Infrastructure.Database.Infrastructure;
 using PasswordManager.Tests.Infrastructure;
 
 namespace PasswordManager.Tests.IntegrationTests;

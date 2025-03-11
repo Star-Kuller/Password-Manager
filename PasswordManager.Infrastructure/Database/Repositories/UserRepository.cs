@@ -13,9 +13,9 @@ public class UserRepository(IDbConnection connection, IDbTransaction transaction
         ArgumentNullException.ThrowIfNull(user);
         
         const string sql = """
-            INSERT INTO Users (Email, PasswordHash, SecretKey, EmailConfirmed)
-            VALUES (@Email, @PasswordHash, @SecretKey, @EmailConfirmed)
-            ON CONFLICT (Email) DO NOTHING
+            INSERT INTO users (login, password_hash, secret_key)
+            VALUES (@Login, @PasswordHash, @SecretKey)
+            ON CONFLICT (login) DO NOTHING
             RETURNING Id
             """;
         var result = await connection.QuerySingleAsync<long?>(
@@ -31,7 +31,7 @@ public class UserRepository(IDbConnection connection, IDbTransaction transaction
     {
         const string sql = """
             UPDATE Users
-            SET PasswordHash = @PasswordHash, SecretKey = @SecretKey, EmailConfirmed = @EmailConfirmed
+            SET PasswordHash = @PasswordHash, SecretKey = @SecretKey
             WHERE Id = @Id
             """;
         
@@ -41,7 +41,7 @@ public class UserRepository(IDbConnection connection, IDbTransaction transaction
     public async Task<EncryptedUser?> GetAsync(long id)
     {
         const string sql = """
-            SELECT Id, Email, PasswordHash, SecretKey, EmailConfirmed
+            SELECT Id, Login, PasswordHash, SecretKey
             FROM Users
             WHERE Id = @Id
             LIMIT 1
@@ -53,17 +53,17 @@ public class UserRepository(IDbConnection connection, IDbTransaction transaction
         return result;
     }
 
-    public async Task<EncryptedUser?> GetAsync(byte[] email)
+    public async Task<EncryptedUser?> GetAsync(byte[] login)
     {
         const string sql = """
-                           SELECT Id, Email, PasswordHash, SecretKey, EmailConfirmed
+                           SELECT Id, Login, PasswordHash, SecretKey
                            FROM Users
                            WHERE Email = @Email
                            LIMIT 1
                            """;
         
         var result = await connection.QuerySingleOrDefaultAsync<EncryptedUser>(
-            sql, new { Email = email }, transaction);
+            sql, new { Login = login }, transaction);
 
         return result;
     }

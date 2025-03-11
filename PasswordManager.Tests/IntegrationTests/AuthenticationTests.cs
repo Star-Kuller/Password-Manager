@@ -1,22 +1,19 @@
+using System.Net.Http.Json;
 using FluentAssertions;
+using PasswordManager.Application.Handlers.Authentication;
 using PasswordManager.Tests.Infrastructure;
 
 namespace PasswordManager.Tests.IntegrationTests;
 
 public class AuthenticationTests(WebAppFactory factory) : IntegrationTestBase(factory)
 {
+    [Fact]
     public async Task Register_and_login_is_successful()
     {
         // Arrange:/register
         var client = AppFactory.CreateClient();
-        const string registerReqJson = """
-                                       {
-                                         "Secret":"encrypted_secret_key",
-                                         "Login":"test@email.com",
-                                         "Password":"password_hash"
-                                       }
-                                       """;
-        var registerReq = new StringContent(registerReqJson);
+        var registerReq = JsonContent.Create(
+            new Registration.Request("encrypted_secret_key", "test@email.com", "password_hash"));
         
         // Act:/register
         var registerRes = await client.PostAsync("/register",registerReq);
