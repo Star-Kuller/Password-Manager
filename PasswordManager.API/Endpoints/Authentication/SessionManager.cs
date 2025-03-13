@@ -13,7 +13,7 @@ public class SessionManager : ISessionManager
         });
     }
 
-    public async Task EndSession(string sessionId)
+    public async Task EndSession()
     {
         await CookieAuth.SignOutAsync();
     }
