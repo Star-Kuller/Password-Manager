@@ -5,15 +5,14 @@ using PasswordManager.Application.Interfaces;
 
 namespace PasswordManager.API.Endpoints.Authentication;
 
-public class LogoutEndpoint(ISessionManager sessionManager) : Endpoint<Registration.Request>
+public class LogoutEndpoint(ISessionManager sessionManager) : EndpointWithoutRequest
 {
     public override void Configure()
     {
-        Post("/logout");
-        AllowAnonymous();
+        Put("/logout");
     }
 
-    public override async Task HandleAsync(Registration.Request req, CancellationToken ct)
+    public override async Task HandleAsync(CancellationToken ct)
     {
         await sessionManager.EndSession();
         await SendNoContentAsync(ct);
