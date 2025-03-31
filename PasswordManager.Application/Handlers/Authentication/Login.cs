@@ -22,12 +22,12 @@ public class Login
             var encryptedUser = await uow.Users.GetAsync(cryptographer.Encrypt(request.Login));
             if (encryptedUser is null)
                 throw new ValidationException("Неверный логин или пароль");
-            var user = encryptedUser.ToUser(cryptographer);
+            var user = encryptedUser.ToEntity(cryptographer);
             if (BCrypt.Net.BCrypt.EnhancedVerify(request.Password, user.PasswordHash))
                 await sessionManager.CreateSession(user.Id!.Value);
             else
                 throw new ValidationException("Неверный логин или пароль");
-            logger.LogInformation($"{user.Login} авторизовался в систему");
+            logger.LogInformation("{UserLogin} авторизовался в систему", user.Login);
         }
     }
 }

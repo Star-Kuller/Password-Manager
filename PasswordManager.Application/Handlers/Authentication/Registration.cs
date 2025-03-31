@@ -29,7 +29,7 @@ public class Registration
             var id = await uow.Users.AddAsync(new EncryptedUser(user, cryptographer));
             await uow.CommitAsync(cancellationToken);
             await sessionManager.CreateSession(id);
-            logger.LogInformation($"{user.Login} зарегистрировался в системе");
+            logger.LogInformation("{UserLogin} зарегистрировался в системе", user.Login);
         }
     }
 }

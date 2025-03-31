@@ -1,7 +1,7 @@
 using FastEndpoints.Security;
 using PasswordManager.Application.Interfaces;
 
-namespace PasswordManager.API.Endpoints.Authentication;
+namespace PasswordManager.API;
 
 public class SessionManager : ISessionManager
 {

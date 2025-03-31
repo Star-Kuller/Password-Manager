@@ -18,7 +18,7 @@ public class EncryptedUser()
         Secret_key = cryptographer.Encrypt(user.SecretKey);
     }
 
-    public User ToUser(ICryptographer cryptographer)
+    public User ToEntity(ICryptographer cryptographer)
     {
         return new User
         {

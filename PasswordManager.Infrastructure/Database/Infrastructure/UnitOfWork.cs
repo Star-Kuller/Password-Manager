@@ -10,6 +10,7 @@ public class UnitOfWork(NpgsqlConnection connection, NpgsqlTransaction transacti
     private bool _commited;
     
     public IUserRepository Users =>  new UserRepository(connection, transaction);
+    public IAccountRepository Accounts { get; }
 
     public async Task CommitAsync(CancellationToken token)
     {
