@@ -14,7 +14,7 @@ public class UserRepository(IDbConnection connection, IDbTransaction transaction
         
         const string sql = """
             INSERT INTO users (login, password_hash, secret_key)
-            VALUES (@Login, @PasswordHash, @SecretKey)
+            VALUES (@Login, @Password_hash, @Secret_key)
             ON CONFLICT (login) DO NOTHING
             RETURNING Id
             """;
@@ -33,7 +33,7 @@ public class UserRepository(IDbConnection connection, IDbTransaction transaction
         
         const string sql = """
             UPDATE Users
-            SET PasswordHash = @PasswordHash, SecretKey = @SecretKey
+            SET password_hash = @Password_hash, secret_key = @Secret_key
             WHERE Id = @Id
             """;
         
@@ -43,9 +43,9 @@ public class UserRepository(IDbConnection connection, IDbTransaction transaction
     public async Task<EncryptedUser?> GetAsync(long id)
     {
         const string sql = """
-            SELECT Id, Login, PasswordHash, SecretKey
+            SELECT id, login, password_hash, secret_key
             FROM Users
-            WHERE Id = @Id
+            WHERE id = @Id
             LIMIT 1
             """;
         
@@ -60,9 +60,9 @@ public class UserRepository(IDbConnection connection, IDbTransaction transaction
         ArgumentNullException.ThrowIfNull(login);
         
         const string sql = """
-                           SELECT Id, Login, PasswordHash, SecretKey
+                           SELECT id, login, password_hash, secret_key
                            FROM Users
-                           WHERE Email = @Email
+                           WHERE login = @Login
                            LIMIT 1
                            """;
         
