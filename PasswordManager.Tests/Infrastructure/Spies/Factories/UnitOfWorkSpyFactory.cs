@@ -4,9 +4,13 @@ namespace PasswordManager.Tests.Infrastructure.Spies.Factories;
 
 public class UnitOfWorkSpyFactory : IUnitOfWorkFactory
 {
-    public UnitOfWorkSpy Instant { get; set; } = new();
+    public List<UnitOfWorkSpy> Instants { get; set; } = new();
+
+    public int CallCounter = 0;
     public Task<IUnitOfWork> CreateAsync(CancellationToken token)
     {
-        return Task.FromResult<IUnitOfWork>(Instant);
+        var instant = Instants[CallCounter];
+        CallCounter++;
+        return Task.FromResult<IUnitOfWork>(instant);
     }
 }

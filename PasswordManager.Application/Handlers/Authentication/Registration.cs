@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.Extensions.Logging;
 using PasswordManager.Application.Interfaces;
 using PasswordManager.Application.Interfaces.Database;
 using PasswordManager.Application.Models.Encrypted;
@@ -13,11 +14,12 @@ public class Registration
     public class Handler(
         IUnitOfWorkFactory uowFactory,
         ISessionManager sessionManager,
-        ICryptographer cryptographer) : IRequestHandler<Request>
+        ICryptographer cryptographer,
+        ILogger<Handler> logger) : IRequestHandler<Request>
     {
         public async Task Handle(Request request, CancellationToken cancellationToken)
         {
-            var uow = await uowFactory.CreateAsync(cancellationToken);
+            await using var uow = await uowFactory.CreateAsync(cancellationToken);
             var user = new User
             {
                 Login = request.Login,
@@ -27,6 +29,7 @@ public class Registration
             var id = await uow.Users.AddAsync(new EncryptedUser(user, cryptographer));
             await uow.CommitAsync(cancellationToken);
             await sessionManager.CreateSession(id);
+            logger.LogInformation($"{user.Login} зарегистрировался в системе");
         }
     }
 }

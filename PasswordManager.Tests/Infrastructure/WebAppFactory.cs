@@ -9,7 +9,7 @@ namespace PasswordManager.Tests.Infrastructure;
 
 public class WebAppFactory : WebApplicationFactory<Program>
 {
-    private string _connectionString;
+    private readonly string _connectionString;
     public WebAppFactory()
     {
         var configuration = new ConfigurationBuilder()

@@ -22,7 +22,7 @@ public class UserRepository(IDbConnection connection, IDbTransaction transaction
             sql, user, transaction);
         
         if (result == null)
-            throw new AlreadyExistException($"Пользователь с такой почтой уже существует");
+            throw new AlreadyExistException("Пользователь с такой почтой уже существует");
 
         return result.Value;
     }

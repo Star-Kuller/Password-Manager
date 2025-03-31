@@ -2,7 +2,8 @@ using PasswordManager.Tests.Infrastructure;
 
 namespace PasswordManager.Tests.IntegrationTests;
 
-public class IntegrationTestBase(WebAppFactory factory) : IClassFixture<WebAppFactory>
+[Collection("IntegrationTests")]
+public class IntegrationTestBase()
 {
-    protected readonly WebAppFactory AppFactory = factory;
+    protected readonly WebAppFactory AppFactory = new();
 }

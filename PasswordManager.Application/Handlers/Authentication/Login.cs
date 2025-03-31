@@ -18,7 +18,7 @@ public class Login
     {
         public async Task Handle(Request request, CancellationToken cancellationToken)
         {
-            var uow = await uowFactory.CreateAsync(cancellationToken);
+            await using var uow = await uowFactory.CreateAsync(cancellationToken);
             var encryptedUser = await uow.Users.GetAsync(cryptographer.Encrypt(request.Login));
             if (encryptedUser is null)
                 throw new ValidationException("Неверный логин или пароль");
@@ -27,6 +27,7 @@ public class Login
                 await sessionManager.CreateSession(user.Id!.Value);
             else
                 throw new ValidationException("Неверный логин или пароль");
+            logger.LogInformation($"{user.Login} авторизовался в систему");
         }
     }
 }

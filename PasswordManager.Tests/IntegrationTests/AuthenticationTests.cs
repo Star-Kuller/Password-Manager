@@ -1,11 +1,10 @@
 using System.Net.Http.Json;
 using FluentAssertions;
 using PasswordManager.Application.Handlers.Authentication;
-using PasswordManager.Tests.Infrastructure;
 
 namespace PasswordManager.Tests.IntegrationTests;
 
-public class AuthenticationTests(WebAppFactory factory) : IntegrationTestBase(factory)
+public class AuthenticationTests : IntegrationTestBase
 {
     [Fact]
     public async Task Register_and_login_is_successful()
@@ -17,6 +16,17 @@ public class AuthenticationTests(WebAppFactory factory) : IntegrationTestBase(fa
         await Test_logout_is_successful(client);
         await Test_login_is_successful(client, "test@email.com", "password_hash");
         await Test_logout_is_successful(client);
+    }
+    
+    [Fact]
+    public async Task Register_and_login_with_wrong_password()
+    {
+        await AppFactory.ResetDatabase();
+        var client = AppFactory.CreateClient();
+
+        await Test_register_is_successful(client, "encrypted_secret_key", "test@email.com", "password_hash");
+        await Test_logout_is_successful(client);
+        await Test_login_is_wrong_password(client, "test@email.com", "wrong_password_hash");
     }
 
     private async Task Test_register_is_successful(HttpClient client, string secret, string login, string password)
@@ -61,6 +71,27 @@ public class AuthenticationTests(WebAppFactory factory) : IntegrationTestBase(fa
         cookieParts.Should().Contain(part => part.Trim().Contains("path=/"), "Куки должны быть доступны на всех путях");
     }
     
+    private async Task Test_login_is_wrong_password(HttpClient client, string login, string password)
+    {
+        // Arrange
+        var request = JsonContent.Create(
+            new Login.Request(login, password));
+        
+        // Act
+        var response = await client.PostAsync("/login",request);
+        
+        // Assert
+        response.IsSuccessStatusCode.Should().BeFalse();
+        if (response.Headers.Contains("Set-Cookie"))
+        {
+            var setCookieHeader = response.Headers.GetValues("Set-Cookie").FirstOrDefault();
+            setCookieHeader.Should().NotBeNull("Куки сессии должны быть установлены");
+            var cookieParts = setCookieHeader.Split(';');
+            var sessionPart = cookieParts.First(part => part.Contains(".AspNetCore.Cookies="));
+            sessionPart.Should().Be(".AspNetCore.Cookies=");
+        }
+    }
+    
     private async Task Test_logout_is_successful(HttpClient client)
     {
         // Act
@@ -73,6 +104,5 @@ public class AuthenticationTests(WebAppFactory factory) : IntegrationTestBase(fa
         var cookieParts = setCookieHeader.Split(';');
         var sessionPart = cookieParts.First(part => part.Contains(".AspNetCore.Cookies="));
         sessionPart.Should().Be(".AspNetCore.Cookies=");
-
     }
 }
