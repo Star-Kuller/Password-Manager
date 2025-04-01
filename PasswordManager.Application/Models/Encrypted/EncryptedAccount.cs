@@ -1,6 +1,8 @@
 using PasswordManager.Application.Interfaces;
 using PasswordManager.Domain.Entities;
 
+// ReSharper disable InconsistentNaming
+
 namespace PasswordManager.Application.Models.Encrypted;
 
 public class EncryptedAccount() : EncryptedEntity<Account>()
@@ -10,7 +12,7 @@ public class EncryptedAccount() : EncryptedEntity<Account>()
     public byte[] Login { get; set; }
     public byte[] Password { get; set; }
     
-    public long DirectoryId { get; set; }
+    public long Directory_id { get; set; }
     public EncryptedDirectory? Directory { get; set; }
     
     public EncryptedAccount(Account account, ICryptographer cryptographer) : this()
@@ -20,7 +22,7 @@ public class EncryptedAccount() : EncryptedEntity<Account>()
         Url = cryptographer.Encrypt(account.Url);
         Login = cryptographer.Encrypt(account.Login);
         Password = cryptographer.Encrypt(account.Password);
-        DirectoryId = account.DirectoryId;
+        Directory_id = account.DirectoryId;
         if(account.Directory is not null) 
             Directory = new EncryptedDirectory(account.Directory, cryptographer);
     }
@@ -34,7 +36,7 @@ public class EncryptedAccount() : EncryptedEntity<Account>()
             Url = cryptographer.Decrypt(Url),
             Login = cryptographer.Decrypt(Login),
             Password = cryptographer.Decrypt(Password),
-            DirectoryId = DirectoryId,
+            DirectoryId = Directory_id,
             Directory = Directory?.ToEntity(cryptographer)
         };
     }

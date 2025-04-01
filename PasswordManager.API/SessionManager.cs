@@ -3,7 +3,7 @@ using PasswordManager.Application.Interfaces;
 
 namespace PasswordManager.API;
 
-public class SessionManager : ISessionManager
+public class SessionManager(IHttpContextAccessor httpContextAccessor) : ISessionManager
 {
     public async Task CreateSession(long userId)
     {
@@ -16,5 +16,18 @@ public class SessionManager : ISessionManager
     public async Task EndSession()
     {
         await CookieAuth.SignOutAsync();
+    }
+    
+    public long? GetCurrentUserId()
+    {
+        var httpContext = httpContextAccessor.HttpContext;
+        if (httpContext is null)
+            return null;
+        
+        var idClaim = httpContext.User.Claims.FirstOrDefault(c => c.Type == "Id")?.Value;
+        if (long.TryParse(idClaim, out var userId))
+            return userId;
+
+        return null;
     }
 }

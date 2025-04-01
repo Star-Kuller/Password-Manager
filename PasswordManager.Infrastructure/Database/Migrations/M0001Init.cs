@@ -3,7 +3,7 @@ using FluentMigrator;
 namespace PasswordManager.Infrastructure.Database.Migrations;
 
 [Migration(2025_03_01_1613)] 
-public class Init : AutoReversingMigration
+public class M0001Init : AutoReversingMigration
 {
     public override void Up()
     {

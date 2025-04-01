@@ -18,6 +18,7 @@ public class RegistrationTests
     private readonly Mock<ICryptographer> _cryptographerMock = new();
     private readonly Mock<ILogger<Registration.Handler>> _loggerMock = new();
     private const long UserId = 1;
+    private const long NewId = 1;
 
     private void SetUp()
     {
@@ -25,6 +26,8 @@ public class RegistrationTests
         var uowSpy = new UnitOfWorkSpy();
         uowSpy.UserRepositoryMock.Setup(ur => ur.AddAsync(It.IsAny<EncryptedUser>()))
             .ReturnsAsync(UserId);
+        uowSpy.DirectoryRepositoryMock.Setup(dr => dr.AddAsync(It.IsAny<EncryptedDirectory>()))
+            .ReturnsAsync(NewId);
         _uowSpyFactory.Instants.Add(uowSpy);
         _cryptographerMock.Setup(c => c.Encrypt(It.IsAny<string>()))
             .Returns([01, 02, 03, 04, 05]);
@@ -55,6 +58,8 @@ public class RegistrationTests
         var uow = _uowSpyFactory.Instants[0];
         uow.UserRepositoryMock.Verify(ur =>
             ur.AddAsync(It.IsAny<EncryptedUser>()), Times.Once);
+        uow.DirectoryRepositoryMock.Verify(dr =>
+            dr.AddAsync(It.IsAny<EncryptedDirectory>()), Times.Once);
         uow.CommitCounter.Should().Be(1);
         
         _sessionManagerMock.Verify(sm => sm.CreateSession(UserId));

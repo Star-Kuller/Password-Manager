@@ -2,7 +2,6 @@ using PasswordManager.Application.Models.Encrypted;
 
 namespace PasswordManager.Application.Interfaces.Database.Repositories;
 
-public interface IUserRepository : ICrudRepository<EncryptedUser>
+public interface IDirectoryRepository : ICrudRepository<EncryptedDirectory>
 {
-    Task<EncryptedUser?> GetAsync(byte[] email);
 }

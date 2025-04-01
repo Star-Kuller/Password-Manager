@@ -7,11 +7,13 @@ namespace PasswordManager.Tests.Infrastructure.Spies;
 public class UnitOfWorkSpy : IUnitOfWork
 {
     public Mock<IUserRepository> UserRepositoryMock { get; set; } = new();
+    public Mock<IDirectoryRepository> DirectoryRepositoryMock { get; set; } = new();
     public Mock<IAccountRepository> AccountRepositoryMock { get; set; } = new();
     public int CommitCounter { get; private set; }
     public int RollBackCounter { get; private set; }
     
     public IUserRepository Users => UserRepositoryMock.Object;
+    public IDirectoryRepository Directories => DirectoryRepositoryMock.Object;
     public IAccountRepository Accounts => AccountRepositoryMock.Object;
 
     public Task CommitAsync(CancellationToken cancellationToken)

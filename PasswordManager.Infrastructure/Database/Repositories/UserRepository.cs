@@ -55,6 +55,16 @@ public class UserRepository(IDbConnection connection, IDbTransaction transaction
         return result;
     }
 
+    public async Task DeleteAsync(long id)
+    {
+        const string sql = """
+                           DELETE Users
+                           WHERE Id = @Id
+                           """;
+        
+        await connection.ExecuteAsync(sql, new { Id = id }, transaction);
+    }
+
     public async Task<EncryptedUser?> GetAsync(byte[] login)
     {
         ArgumentNullException.ThrowIfNull(login);

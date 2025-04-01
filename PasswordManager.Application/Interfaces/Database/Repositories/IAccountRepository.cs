@@ -2,9 +2,6 @@ using PasswordManager.Application.Models.Encrypted;
 
 namespace PasswordManager.Application.Interfaces.Database.Repositories;
 
-public interface IAccountRepository
+public interface IAccountRepository : ICrudRepository<EncryptedAccount>
 {
-    Task<long> AddAsync(EncryptedAccount account);
-    Task UpdateAsync(EncryptedAccount account);
-    Task<EncryptedAccount?> GetAsync(long id);
 }

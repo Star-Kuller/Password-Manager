@@ -4,5 +4,5 @@ namespace PasswordManager.Domain.Entities;
 
 public class Entity : IId
 {
-    public long? Id { get; init; }
+    public long? Id { get; set; }
 }

@@ -12,7 +12,7 @@ public class Create
         string Url,
         string Login, 
         string Password, 
-        long? DirectoryId): IRequest<long>;
+        long DirectoryId): IRequest<long>;
 
     public class Handler(
         IUnitOfWorkFactory uowFactory,

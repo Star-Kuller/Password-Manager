@@ -1,15 +1,16 @@
 using FluentAssertions;
 using Moq;
-using PasswordManager.Application.Handlers.Main.Accounts;
+using PasswordManager.Application.Handlers.Main.Directories;
 using PasswordManager.Application.Interfaces;
 using PasswordManager.Application.Models.Encrypted;
 using PasswordManager.Tests.Infrastructure.Spies;
 using PasswordManager.Tests.Infrastructure.Spies.Factories;
 
-namespace PasswordManager.Tests.UnitTest.RequestHandlers.Main.Accounts;
+namespace PasswordManager.Tests.UnitTest.RequestHandlers.Main.Directories;
 
 public class CreateTests
 {
+    private readonly Mock<ISessionManager> _sessionManagerMock = new();
     private readonly UnitOfWorkSpyFactory _uowSpyFactory = new();
     private readonly Mock<ICryptographer> _cryptographerMock = new();
     private const long NewId = 1;
@@ -17,26 +18,24 @@ public class CreateTests
     private void SetUp()
     {
         var uow = new UnitOfWorkSpy();
-        uow.AccountRepositoryMock
-            .Setup(ar => ar.AddAsync(It.IsAny<EncryptedAccount>()))
+        uow.DirectoryRepositoryMock
+            .Setup(ar => ar.AddAsync(It.IsAny<EncryptedDirectory>()))
             .ReturnsAsync(NewId);
         _uowSpyFactory.Instants.Add(uow);
     }
     
     [Fact]
-    public async Task Create_account_is_successful()
+    public async Task Create_directory_is_successful()
     {
         //Arrange
         SetUp();
         
         var request = new Create.Request(
             "TestTitle",
-            "test.com",
-            "TestLogin",
-            "TestPassword",
             1);
         
         var handler = new Create.Handler(
+            _sessionManagerMock.Object,
             _uowSpyFactory,
             _cryptographerMock.Object
         );
@@ -46,7 +45,7 @@ public class CreateTests
         
         //Assert
         id.Should().Be(1);
-        _uowSpyFactory.Instants[0].AccountRepositoryMock
-            .Verify(ar => ar.AddAsync(It.IsAny<EncryptedAccount>()), Times.Once);
+        _uowSpyFactory.Instants[0].DirectoryRepositoryMock
+            .Verify(ar => ar.AddAsync(It.IsAny<EncryptedDirectory>()), Times.Once);
     }
 }
